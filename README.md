@@ -2,6 +2,13 @@
 
 This builds my own Vagrant Box build for AWS Linux 2 as [documented by AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-linux-2-virtual-machine.html).
 
+## Pre-requisites
+
+ * Virtualbox
+ * Mac or Linux
+ * curl
+ * vagrant
+
 ## Usage
 
 Change the default user password in the [`user-data` file](./seedconfig/user-data)
@@ -10,6 +17,7 @@ Change the default user password in the [`user-data` file](./seedconfig/user-dat
 ec2-user:plain_text_password
 ````
 
+Download the Virtualbox Amazon Linux 2 VM Image
 Create the box:
 
 ````shell
