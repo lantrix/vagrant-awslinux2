@@ -1,0 +1,17 @@
+#cloud-config
+# vim:syntax=yaml
+users:
+# A user by the name `ec2-user` is created in the image by default.
+  - default
+chpasswd:
+  list: |
+    ec2-user:plain_text_password
+# In the above line, do not add any spaces after 'ec2-user:'.
+
+# NOTE: Cloud-init applies network settings on every boot by default. To retain network settings from first boot, add following ‘write_files’ section:
+write_files:
+  - path: /etc/cloud/cloud.cfg.d/80_disable_network_after_firstboot.cfg
+    content: |
+      # Disable network configuration after first boot
+      network:
+        config: disabled
