@@ -23,15 +23,8 @@ write_files:
   - path: /var/lib/cloud/scripts/per-once/update.sh
     permissions: '0744'
     content: |
-      apt-get update -y
-      apt-get upgrade -y
-  - path: /var/lib/cloud/scripts/per-once/vbox-guest.sh
-    permissions: '0744'
-    content: |
-      apt-get install -y gcc build-essential linux-headers-server
-      mount /dev/cdrom /mnt
-      cd /mnt
-      ./VBoxLinuxAdditions.run
+      yum update -y
+      yum upgrade -y
   - path: /etc/sudoers.d/999-vagrant-cloud-init-requiretty
     permissions: '0440'
     content: |

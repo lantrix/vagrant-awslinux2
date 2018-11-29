@@ -1,4 +1,14 @@
 #!/bin/bash
+
+function sshcommand () {
+    if [ ! -e vagrant ]; then curl -s -L -O https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant && chmod 600 vagrant; fi
+    while ssh -i vagrant -o ConnectTimeout=2 -o "StrictHostKeyChecking no" -p 2222 vagrant@localhost "$1"
+        #255 is timout
+        if [ $? -lt 255 ]; then break; fi
+        do sleep 5
+    done
+}
+
 rm -f seed.iso > /dev/null 2>&1
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     pushd seedconfig/
@@ -55,12 +65,27 @@ VBoxManage createvm --name $VM --ostype "Linux_64" --register
 VBoxManage storagectl $VM --name "SATA Controller" --add sata --controller IntelAHCI
 VBoxManage storageattach $VM --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium ${path}
 VBoxManage storagectl $VM --name "IDE Controller" --add ide
-VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium ./seed.iso
+VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium ./seed.iso
 VBoxManage modifyvm $VM --ioapic on
 VBoxManage modifyvm $VM --boot1 dvd --boot2 disk --boot3 none --boot4 none
 VBoxManage modifyvm $VM --memory 1024 --vram 128
-VBoxManage modifyvm $VM --nic1 bridged --bridgeadapter1 ${networkInterface}
+VBoxManage modifyvm $VM --nic1 nat
 VBoxManage modifyvm $VM --natpf1 "guestssh,tcp,,2222,,22" #Vagrant SSH
-VBoxHeadless -s $VM
-#Sleep a bit first
-VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium none
+VBoxManage startvm $VM --type headless
+until [[ $(sshcommand "cloud-init status") == *"done"* ]]
+do
+    echo "Waiting for cloud-init to finish..."
+    sleep 1
+done
+ssh -i vagrant -o "StrictHostKeyChecking no" -p 2222 vagrant@localhost "sudo shutdown --halt now"
+VBoxManage controlvm $VM poweroff
+#Guest additions
+VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium emptydrive
+vBoxVersion=$(VBoxManage --version | sed 's/r.*//')
+echo "Downloading virtualbox guest extensions..."
+wget -c --show-progress "http://download.virtualbox.org/virtualbox/${vBoxVersion}/VBoxGuestAdditions_${vBoxVersion}.iso"
+VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium "./VBoxGuestAdditions_${vBoxVersion}.iso"
+VBoxManage startvm $VM --type headless
+sshcommand "sudo yum install -y gcc build-essential kernel-headers kernel-devel"
+sshcommand "sudo mount /dev/cdrom /mnt"
+sshcommand "sudo /mnt/VBoxLinuxAdditions.run"
