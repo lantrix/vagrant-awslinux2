@@ -58,4 +58,7 @@ VBoxManage modifyvm $VM --ioapic on
 VBoxManage modifyvm $VM --boot1 dvd --boot2 disk --boot3 none --boot4 none
 VBoxManage modifyvm $VM --memory 1024 --vram 128
 VBoxManage modifyvm $VM --nic1 bridged --bridgeadapter1 ${networkInterface}
+VBoxManage modifyvm $VM --natpf1 "guestssh,tcp,,2222,,22" #Vagrant SSH
 VBoxHeadless -s $VM
+#Sleep a bit first
+VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium none

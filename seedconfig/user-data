@@ -20,3 +20,20 @@ write_files:
       # Disable network configuration after first boot
       network:
         config: disabled
+  - path: /var/lib/cloud/scripts/per-once/update.sh
+    permissions: '0744'
+    content: |
+      apt-get update -y
+      apt-get upgrade -y
+  - path: /var/lib/cloud/scripts/per-once/vbox-guest.sh
+    permissions: '0744'
+    content: |
+      apt-get install -y gcc build-essential linux-headers-server
+      mount /dev/cdrom /mnt
+      cd /mnt
+      ./VBoxLinuxAdditions.run
+  - path: /etc/sudoers.d/999-vagrant-cloud-init-requiretty
+    permissions: '0440'
+    content: |
+      Defaults:vagrant !requiretty
+      Defaults env_keep = "SSH_AUTH_SOCK"

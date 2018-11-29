@@ -4,10 +4,9 @@ This builds my own Vagrant Box build for AWS Linux 2 as [documented by AWS](http
 
 ## Pre-requisites
 
- * Virtualbox
+ * [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
  * Mac or Linux
- * curl
- * vagrant
+ * [vagrant](https://www.vagrantup.com/downloads.html)
 
 ## Usage
 
