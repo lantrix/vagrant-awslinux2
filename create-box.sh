@@ -39,12 +39,15 @@ if ! [ "$?" = "0" ]; then
     if ! [ "$?" = "0" ]; then
         echo "ERROR: SHA256 Sum of ${path} downloaded doesn't match from decrypted GPG ${shaFile}"
         #exit 1
+    else
+        echo "${path} matches SHA256 from decrypted GPG ${shaFile}"
     fi
 else
     echo "Existing ${path} matches SHA256 from decrypted GPG ${shaFile}"
 fi
 
 #Spin up VM with seed.iso
+echo "Creating VM..."
 VM="amazonliunux2"
 VBoxManage createvm --name $VM --ostype "Linux_64" --register
 VBoxManage storagectl $VM --name "SATA Controller" --add sata --controller IntelAHCI
