@@ -89,3 +89,4 @@ VBoxManage startvm $VM --type headless
 sshcommand "sudo yum install -y gcc build-essential kernel-headers kernel-devel"
 sshcommand "sudo mount /dev/cdrom /mnt"
 sshcommand "sudo /mnt/VBoxLinuxAdditions.run"
+sshcommand "modinfo vboxguest"
