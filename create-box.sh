@@ -1,3 +1,5 @@
+#!/bin/bash
+rm -f seed.iso > /dev/null 2>&1
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     pushd seedconfig/
     genisoimage -output ../seed.iso -volid cidata -joliet -rock user-data meta-data
