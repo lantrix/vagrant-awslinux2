@@ -13,10 +13,36 @@ fi
 
 #Get Virtualbox AWS VM
 latestImageLocation='https://cdn.amazonlinux.com/os-images/latest/virtualbox/'
+awsSigningKey='https://cdn.amazonlinux.com/_assets/11CF1F95C87F5B1A.asc'
 baseUrl=$(curl -I ${latestImageLocation} | grep location | awk '{print $2}' | tr -d '\r')
 path=$(curl -sL ${latestImageLocation} | grep vdi | grep -o -E 'href="([^"#]+)"' | cut -d'"' -f2 | tr -d '\r')
-echo "Downloading Amazon Linux 2 VM Image: ${baseUrl}${path}"
-curl --progress-bar "${baseUrl}${path}" -O ${path}
+shaFile=$(curl -sL ${latestImageLocation} | grep SHA256SUMS.gpg | grep -o -E 'href="([^"#]+)"' | cut -d'"' -f2)
+curl -s -L -O "${baseUrl}${shaFile}"
+decryptedShaSumsFile='SHA256SUMS'
+echo "Checking GPG signature of ${shaFile} and extracting ${decryptedShaSumsFile}"
+tempPubRing=$(mktemp)
+tempSecRing=$(mktemp)
+curl -s ${awsSigningKey} | gpg --no-options --no-default-keyring --keyring ${tempPubRing} --secret-keyring ${tempSecRing} --import -
+rm -f ${decryptedShaSumsFile} > /dev/null 2>&1
+gpg -d --keyring ${tempPubRing} --secret-keyring ${tempSecRing} --output ${decryptedShaSumsFile} ${shaFile}
+if ! [ "$?" = "0" ]; then
+    echo "ERROR: Failed to verify GPG signature"
+    #exit 1
+fi
+echo "Checking for existing VM Image..."
+shasum -c -a 256 ${decryptedShaSumsFile} #Check for existing download
+if ! [ "$?" = "0" ]; then
+    echo "Downloading Amazon Linux 2 VM Image: ${baseUrl}${path}"
+    #curl --progress-bar -L -O -C - "${baseUrl}${path}"
+    wget -c --show-progress "${baseUrl}${path}"
+    shasum -c -a 256 ${decryptedShaSumsFile} # Check download against pre checked GPG signed SHA256SUMS
+    if ! [ "$?" = "0" ]; then
+        echo "ERROR: SHA256 Sum of ${path} downloaded doesn't match from decrypted GPG ${shaFile}"
+        #exit 1
+    fi
+else
+    echo "Existing ${path} matches SHA256 from decrypted GPG ${shaFile}"
+fi
 
 #Spin up VM with seed.iso
 VM="amazonliunux2"
