@@ -96,7 +96,7 @@ sshcommand "sudo /mnt/VBoxLinuxAdditions.run"
 sshcommand "sudo modinfo vboxguest"
 sshcommand "sudo umount /dev/cdrom"
 
-# Prep for vagrant & shutdown
+# Prep for vagrant & shutdown & package
 sshcommand "sudo bash -c 'echo \"UseDNS no\" >> /etc/ssh/sshd_config'"
 sshcommand "sudo bash -s" < ./vagrant-prep.sh
 VBoxManage controlvm $VM acpipowerbutton
@@ -105,3 +105,4 @@ do
     echo "Waiting for $VM to poweroff..."
     sleep 1
 done
+vagrant package --base $VM --output ${VM}.box
