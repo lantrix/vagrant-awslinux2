@@ -77,8 +77,7 @@ do
     echo "Waiting for cloud-init to finish..."
     sleep 1
 done
-ssh -i vagrant -o "StrictHostKeyChecking no" -p 2222 vagrant@localhost "sudo shutdown --halt now"
-VBoxManage controlvm $VM poweroff
+VBoxManage controlvm $VM acpipowerbutton
 until [[ ! $(vboxmanage list runningvms) == *$VM* ]]
 do
     echo "Waiting for $VM to poweroff..."
@@ -100,9 +99,7 @@ sshcommand "sudo umount /dev/cdrom"
 # Prep for vagrant & shutdown
 sshcommand "sudo bash -c 'echo \"UseDNS no\" >> /etc/ssh/sshd_config'"
 sshcommand "sudo bash -s" < ./vagrant-prep.sh
-sshcommand "sudo echo 'UseDNS no' >> /etc/ssh/sshd_config"
-ssh -i vagrant -o "StrictHostKeyChecking no" -p 2222 vagrant@localhost "sudo shutdown --halt now"
-VBoxManage controlvm $VM poweroff
+VBoxManage controlvm $VM acpipowerbutton
 until [[ ! $(vboxmanage list runningvms) == *$VM* ]]
 do
     echo "Waiting for $VM to poweroff..."
