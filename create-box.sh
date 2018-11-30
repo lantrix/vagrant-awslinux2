@@ -97,3 +97,12 @@ sshcommand "sudo /mnt/VBoxLinuxAdditions.run"
 sshcommand "sudo modinfo vboxguest"
 sshcommand "sudo umount /dev/cdrom"
 
+# Prep for vagrant & shutdown
+sshcommand "sudo bash -s" < ./vagrant-prep.sh
+ssh -i vagrant -o "StrictHostKeyChecking no" -p 2222 vagrant@localhost "sudo shutdown --halt now"
+VBoxManage controlvm $VM poweroff
+until [[ ! $(vboxmanage list runningvms) == *$VM* ]]
+do
+    echo "Waiting for $VM to poweroff..."
+    sleep 1
+done
