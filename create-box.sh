@@ -99,6 +99,7 @@ sshcommand "sudo umount /dev/cdrom"
 
 # Prep for vagrant & shutdown
 sshcommand "sudo bash -s" < ./vagrant-prep.sh
+sshcommand "sudo echo 'UseDNS no' >> /etc/ssh/sshd_config"
 ssh -i vagrant -o "StrictHostKeyChecking no" -p 2222 vagrant@localhost "sudo shutdown --halt now"
 VBoxManage controlvm $VM poweroff
 until [[ ! $(vboxmanage list runningvms) == *$VM* ]]
