@@ -79,6 +79,11 @@ do
 done
 ssh -i vagrant -o "StrictHostKeyChecking no" -p 2222 vagrant@localhost "sudo shutdown --halt now"
 VBoxManage controlvm $VM poweroff
+until [[ ! $(vboxmanage list runningvms) == *$VM* ]]
+do
+    echo "Waiting for $VM to poweroff..."
+    sleep 1
+done
 #Guest additions
 VBoxManage storageattach $VM --storagectl "IDE Controller" --port 0 --device 1 --type dvddrive --medium emptydrive
 vBoxVersion=$(VBoxManage --version | sed 's/r.*//')
@@ -89,4 +94,6 @@ VBoxManage startvm $VM --type headless
 sshcommand "sudo yum install -y gcc build-essential kernel-headers kernel-devel"
 sshcommand "sudo mount /dev/cdrom /mnt"
 sshcommand "sudo /mnt/VBoxLinuxAdditions.run"
-sshcommand "modinfo vboxguest"
+sshcommand "sudo modinfo vboxguest"
+sshcommand "sudo umount /dev/cdrom"
+
