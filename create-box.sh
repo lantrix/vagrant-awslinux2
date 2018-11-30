@@ -60,7 +60,7 @@ fi
 
 #Spin up VM with seed.iso
 echo "Creating VM..."
-VM="amazonliunux2"
+VM="amazonlinux2"
 VBoxManage createvm --name $VM --ostype "Linux_64" --register
 VBoxManage storagectl $VM --name "SATA Controller" --add sata --controller IntelAHCI
 VBoxManage storageattach $VM --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium ${path}
